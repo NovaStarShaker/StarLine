@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>StarLine Feed</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StarLine Feed</title>
 </head>
 <body>
 <h1>Feed</h1>
 <nav>
   <a href="index.html">Home</a>
-  <a href="profile.html">My Profile</a>
+  <a href="profile.html">Profile</a>
+  <button onclick="logout()">Logout</button>
 </nav>
 
 <textarea id="postText" placeholder="What's on your mind?"></textarea><br>
@@ -18,7 +19,6 @@
 <hr>
 <div id="feed"></div>
 
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore-compat.js"></script>
@@ -26,11 +26,10 @@
 
 <script>
 auth.onAuthStateChanged(user => {
-  if (!user) location.href = "auth.html";
+  if (!user) window.location.href = "auth.html";
 
   const feedDiv = document.getElementById("feed");
   
-  // Display live feed
   db.collection("posts").orderBy("time", "desc")
     .onSnapshot(snapshot => {
       feedDiv.innerHTML = "";
@@ -43,6 +42,7 @@ auth.onAuthStateChanged(user => {
 });
 
 function createPost() {
+  const postText = document.getElementById("postText");
   if (!auth.currentUser || !postText.value.trim()) return;
 
   db.collection("posts").add({
@@ -52,6 +52,10 @@ function createPost() {
   });
 
   postText.value = "";
+}
+
+function logout() {
+  auth.signOut().then(() => window.location.href = "auth.html");
 }
 </script>
 </body>
