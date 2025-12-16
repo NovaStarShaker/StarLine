@@ -5,19 +5,70 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NovaStar Profile</title>
   <style>
-    body { font-family: Arial; background-color: #f0f0f0; margin:0; padding:0; }
-    header { background-color: #4B0082; color:white; padding:20px; text-align:center; }
-    nav { background-color: #6A0DAD; padding:10px; text-align:center; }
+    body { font-family: Arial, sans-serif; margin:0; background:#f0f2f5; }
+    header { background:#4B0082; color:white; padding:15px; text-align:center; }
+    nav { background:#6A0DAD; padding:10px; text-align:center; }
     nav a { color:white; text-decoration:none; margin:0 15px; font-weight:bold; }
     nav a:hover { text-decoration:underline; }
-    main { padding:20px; max-width:800px; margin:auto; background:white; box-shadow:0 0 10px rgba(0,0,0,0.1); margin-top:20px; }
-    .profile-header { text-align:center; }
-    .profile-header img { width:120px; height:120px; border-radius:50%; border:3px solid #6A0DAD; margin-bottom:10px; }
-    .profile-info { text-align:center; margin-bottom:20px; }
-    .profile-info h2 { margin:5px 0; }
+    main { max-width:900px; margin:20px auto; background:white; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+    
+    /* Cover photo */
+    .cover-photo {
+      width:100%;
+      height:200px;
+      background:#ddd url('https://via.placeholder.com/900x200') center/cover no-repeat;
+      position:relative;
+    }
+
+    /* Profile picture */
+    .profile-pic {
+      width:150px;
+      height:150px;
+      border-radius:50%;
+      border:4px solid white;
+      position:absolute;
+      bottom:-75px;
+      left:20px;
+      background:white;
+    }
+
+    .profile-info {
+      padding:90px 20px 20px 20px;
+    }
+
+    .profile-info h2 { margin:0; }
     .profile-info p { color:#555; }
-    .post { padding:15px; border-bottom:1px solid #ddd; margin-bottom:10px; }
-    #gallery img { border-radius:8px; }
+
+    /* Gallery */
+    .gallery {
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin:20px 0;
+    }
+    .gallery img {
+      width:150px;
+      height:150px;
+      object-fit:cover;
+      border-radius:8px;
+      cursor:pointer;
+    }
+
+    /* Posts */
+    .post {
+      border:1px solid #ddd;
+      padding:10px;
+      margin-bottom:15px;
+      border-radius:8px;
+      background:#fff;
+    }
+    .post strong { color:#4B0082; }
+
+    /* Add post / gallery input */
+    .input-container { margin:15px 0; }
+    input[type="text"] { padding:10px; width:70%; margin-right:5px; }
+    button { padding:10px; background:#1877f2; color:white; border:none; cursor:pointer; }
+    button:hover { background:#165ecf; }
   </style>
 </head>
 <body>
@@ -35,59 +86,77 @@
 </nav>
 
 <main>
-  <!-- Profile Picture Section -->
-  <div class="profile-header">
-    <img id="profilePic" src="https://via.placeholder.com/120" alt="Profile Picture">
+  <!-- Cover photo and profile picture -->
+  <div class="cover-photo">
+    <img id="profilePic" class="profile-pic" src="https://via.placeholder.com/150" alt="Profile Picture">
   </div>
 
-  <!-- User Info -->
+  <!-- Profile info -->
   <div class="profile-info">
     <h2 id="username">User</h2>
-    <p id="bio">This is a sample bio.</p>
+    <p id="bio">This is a sample bio. You can edit this for your profile.</p>
   </div>
 
-  <!-- User Posts -->
-  <h3>Recent Posts</h3>
-  <div id="posts">
-    <div class="post"><p><strong>Post:</strong> Example post content goes here.</p></div>
-  </div>
-
-  <!-- Gallery Section -->
+  <!-- Gallery section -->
   <h3>Gallery</h3>
-  <div id="gallery" style="text-align:center;"></div>
+  <div class="input-container">
+    <input type="text" id="galleryInput" placeholder="Enter image URL to add to gallery">
+    <button onclick="addGalleryImage()">Add Image</button>
+  </div>
+  <div id="gallery" class="gallery"></div>
 
+  <!-- Posts section -->
+  <h3>Posts</h3>
+  <div class="input-container">
+    <input type="text" id="postInput" placeholder="What's on your mind?">
+    <button onclick="addPost()">Post</button>
+  </div>
+  <div id="posts"></div>
 </main>
 
-<footer>
+<footer style="text-align:center; padding:15px; background:#4B0082; color:white;">
   &copy; 2025 NovaStar Social
 </footer>
 
 <script>
-  // Get username and profile pic from URL
+  // Get username and profile picture from URL
   const params = new URLSearchParams(window.location.search);
   const username = params.get('user') || 'Guest';
-  const pic = params.get('pic') || 'https://via.placeholder.com/120';
+  const pic = params.get('pic') || 'https://via.placeholder.com/150';
 
-  // Update profile header and info
   document.getElementById('username').textContent = username;
-  document.getElementById('bio').textContent = `This is ${username}'s bio.`;
   document.getElementById('profilePic').src = pic;
+  document.getElementById('bio').textContent = `This is ${username}'s bio.`;
 
-  // Example gallery images
-  const galleryImages = [
+  // Initialize gallery with example images
+  const galleryDiv = document.getElementById('gallery');
+  const exampleGallery = [
     'https://via.placeholder.com/150/FF0000',
     'https://via.placeholder.com/150/00FF00',
     'https://via.placeholder.com/150/0000FF'
   ];
+  exampleGallery.forEach(url => addGalleryImage(url));
 
-  const galleryDiv = document.getElementById('gallery');
-  galleryImages.forEach(url => {
+  function addGalleryImage(url) {
+    const imageUrl = url || document.getElementById('galleryInput').value;
+    if(imageUrl.trim() === '') return;
     const img = document.createElement('img');
-    img.src = url;
-    img.style.width = '120px';
-    img.style.margin = '5px';
+    img.src = imageUrl;
     galleryDiv.appendChild(img);
-  });
+    document.getElementById('galleryInput').value = '';
+  }
+
+  // Posts section
+  const postsDiv = document.getElementById('posts');
+  function addPost() {
+    const postText = document.getElementById('postInput').value;
+    if(postText.trim() === '') return;
+    const postDiv = document.createElement('div');
+    postDiv.className = 'post';
+    postDiv.innerHTML = `<strong>${username}:</strong> ${postText}`;
+    postsDiv.prepend(postDiv); // newest on top
+    document.getElementById('postInput').value = '';
+  }
 </script>
 
 </body>
