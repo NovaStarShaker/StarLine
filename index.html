@@ -1,20 +1,100 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>StarLine Feed</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NovaStar Social</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #4B0082;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    nav {
+      background-color: #6A0DAD;
+      padding: 10px;
+      text-align: center;
+    }
+
+    nav a, nav button {
+      color: white;
+      text-decoration: none;
+      margin: 0 12px;
+      font-weight: bold;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    nav a:hover, nav button:hover {
+      text-decoration: underline;
+    }
+
+    main {
+      padding: 20px;
+      max-width: 800px;
+      margin: 20px auto;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    textarea {
+      width: 100%;
+      height: 80px;
+      margin-bottom: 10px;
+    }
+
+    .post {
+      padding: 15px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      background-color: #4B0082;
+      color: white;
+      margin-top: 20px;
+    }
+  </style>
 </head>
+
 <body>
 
-<h1>StarLine</h1>
-<button onclick="logout()">Logout</button>
-<a href="profile.html">My Profile</a>
+<header>
+  <h1>NovaStar Social</h1>
+  <p>Your cosmic social feed</p>
+</header>
 
-<h3>Create Post</h3>
-<textarea id="postText"></textarea>
-<button onclick="post()">Post</button>
+<nav>
+  <a href="index.html">Home</a>
+  <a href="profile.html">Profile</a>
+  <button onclick="logout()">Logout</button>
+</nav>
 
-<h3>Feed</h3>
-<div id="feed"></div>
+<main>
+  <h2>Create Post</h2>
+  <textarea id="postText" placeholder="What's on your mind?"></textarea>
+  <button onclick="createPost()">Post</button>
+
+  <h2>Feed</h2>
+  <div id="feed"></div>
+</main>
+
+<footer>
+  &copy; 2025 NovaStar Social
+</footer>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
@@ -35,29 +115,45 @@
   const db = firebase.firestore();
 
   auth.onAuthStateChanged(user => {
-    if (!user) window.location.href = "auth.html";
+    if (!user) {
+      window.location.href = "auth.html";
+    }
   });
 
   function logout() {
-    auth.signOut().then(() => location.href = "auth.html");
+    auth.signOut().then(() => {
+      window.location.href = "auth.html";
+    });
   }
 
-  function post() {
-    auth.currentUser && db.collection("posts").add({
+  function createPost() {
+    if (!auth.currentUser || !postText.value.trim()) return;
+
+    db.collection("posts").add({
       uid: auth.currentUser.uid,
       text: postText.value,
       time: firebase.firestore.FieldValue.serverTimestamp()
     });
+
     postText.value = "";
   }
 
-  db.collection("posts").orderBy("time", "desc")
-    .onSnapshot(snap => {
+  db.collection("posts")
+    .orderBy("time", "desc")
+    .onSnapshot(snapshot => {
       feed.innerHTML = "";
-      snap.forEach(doc => {
+      snapshot.forEach(doc => {
         const d = doc.data();
-        const date = d.time?.toDate().toLocaleDateString();
-        feed.innerHTML += `<p>${d.text}<br><small>${date}</small></p>`;
+        const date = d.time
+          ? d.time.toDate().toLocaleString()
+          : "";
+
+        feed.innerHTML += `
+          <div class="post">
+            <p>${d.text}</p>
+            <small>${date}</small>
+          </div>
+        `;
       });
     });
 </script>
