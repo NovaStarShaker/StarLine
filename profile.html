@@ -1,103 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NovaStar Profile</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin:0; background:#f0f2f5; }
-    header { background:#4B0082; color:white; padding:15px; text-align:center; }
-    nav { background:#6A0DAD; padding:10px; text-align:center; }
-    nav a { color:white; text-decoration:none; margin:0 15px; font-weight:bold; }
-    nav a:hover { text-decoration:underline; }
-    main { max-width:900px; margin:20px auto; background:white; box-shadow:0 0 10px rgba(0,0,0,0.1); }
-    
-    /* Cover photo */
-    .cover-photo {
-      width:100%;
-      height:200px;
-      background:#ddd url('https://via.placeholder.com/900x200') center/cover no-repeat;
-      position:relative;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NovaStar Profile</title>
+<style>
+  body { font-family: Arial, sans-serif; margin:0; background:#f0f2f5; }
+  header { background:#4B0082; color:white; padding:15px; text-align:center; }
+  nav { background:#6A0DAD; padding:10px; text-align:center; }
+  nav a { color:white; text-decoration:none; margin:0 15px; font-weight:bold; }
+  nav a:hover { text-decoration:underline; }
+  main { max-width:900px; margin:20px auto; background:white; box-shadow:0 0 10px rgba(0,0,0,0.1); }
 
-    /* Profile picture */
-    .profile-pic {
-      width:150px;
-      height:150px;
-      border-radius:50%;
-      border:4px solid white;
-      position:absolute;
-      bottom:-75px;
-      left:20px;
-      background:white;
-    }
+  .cover-photo { width:100%; height:200px; background:#ddd; position:relative; }
+  .profile-pic { width:150px; height:150px; border-radius:50%; border:4px solid white; position:absolute; bottom:-75px; left:20px; background:white; }
+  .profile-info { padding:90px 20px 20px 20px; }
+  .profile-info h2 { margin:0; }
+  .profile-info p { color:#555; }
 
-    .profile-info {
-      padding:90px 20px 20px 20px;
-    }
+  .gallery { display:flex; flex-wrap:wrap; gap:10px; margin:20px 0; }
+  .gallery img { width:150px; height:150px; object-fit:cover; border-radius:8px; cursor:pointer; }
 
-    .profile-info h2 { margin:0; }
-    .profile-info p { color:#555; }
+  .post { border:1px solid #ddd; padding:10px; margin-bottom:15px; border-radius:8px; background:#fff; }
+  .post strong { color:#4B0082; }
 
-    /* Gallery */
-    .gallery {
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin:20px 0;
-    }
-    .gallery img {
-      width:150px;
-      height:150px;
-      object-fit:cover;
-      border-radius:8px;
-      cursor:pointer;
-    }
+  .input-container { margin:15px 0; }
+  input[type="text"] { padding:10px; width:70%; margin-right:5px; }
+  button { padding:10px; background:#1877f2; color:white; border:none; cursor:pointer; }
+  button:hover { background:#165ecf; }
+</style>
 
-    /* Posts */
-    .post {
-      border:1px solid #ddd;
-      padding:10px;
-      margin-bottom:15px;
-      border-radius:8px;
-      background:#fff;
-    }
-    .post strong { color:#4B0082; }
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-storage-compat.js"></script>
 
-    /* Add post / gallery input */
-    .input-container { margin:15px 0; }
-    input[type="text"] { padding:10px; width:70%; margin-right:5px; }
-    button { padding:10px; background:#1877f2; color:white; border:none; cursor:pointer; }
-    button:hover { background:#165ecf; }
-  </style>
-</head>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDaZl3MtYPutJMY1aqozvVoN8WbjNnlW20",
+    authDomain: "starline-social.firebaseapp.com",
+    projectId: "starline-social",
+    storageBucket: "starline-social.firebasestorage.app",
+    messagingSenderId: "902689303596",
+    appId: "1:902689303596:web:b77d39e05d51c5b8993589",
+    measurementId: "G-647YLJZ7BS"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const storage = firebase.storage();
+</script>
+
 <body>
-
 <header>
   <h1>NovaStar Social</h1>
 </header>
 
 <nav>
   <a href="index.html">Home</a>
-  <a href="auth.html">Login / Sign Up</a>
-  <a href="profile.html">Profile</a>
-  <a href="#">Messages</a>
-  <a href="#">Friends</a>
+  <a href="auth.html">Logout</a>
 </nav>
 
 <main>
-  <!-- Cover photo and profile picture -->
   <div class="cover-photo">
     <img id="profilePic" class="profile-pic" src="https://via.placeholder.com/150" alt="Profile Picture">
   </div>
 
-  <!-- Profile info -->
   <div class="profile-info">
     <h2 id="username">User</h2>
-    <p id="bio">This is a sample bio. You can edit this for your profile.</p>
+    <p id="bio">This is your bio.</p>
   </div>
 
-  <!-- Gallery section -->
   <h3>Gallery</h3>
   <div class="input-container">
     <input type="text" id="galleryInput" placeholder="Enter image URL to add to gallery">
@@ -105,7 +80,6 @@
   </div>
   <div id="gallery" class="gallery"></div>
 
-  <!-- Posts section -->
   <h3>Posts</h3>
   <div class="input-container">
     <input type="text" id="postInput" placeholder="What's on your mind?">
@@ -119,45 +93,64 @@
 </footer>
 
 <script>
-  // Get username and profile picture from URL
-  const params = new URLSearchParams(window.location.search);
-  const username = params.get('user') || 'Guest';
-  const pic = params.get('pic') || 'https://via.placeholder.com/150';
+  let currentUser;
 
-  document.getElementById('username').textContent = username;
-  document.getElementById('profilePic').src = pic;
-  document.getElementById('bio').textContent = `This is ${username}'s bio.`;
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = "auth.html";
+      return;
+    }
+    currentUser = user;
 
-  // Initialize gallery with example images
-  const galleryDiv = document.getElementById('gallery');
-  const exampleGallery = [
-    'https://via.placeholder.com/150/FF0000',
-    'https://via.placeholder.com/150/00FF00',
-    'https://via.placeholder.com/150/0000FF'
-  ];
-  exampleGallery.forEach(url => addGalleryImage(url));
+    db.collection('users').doc(user.uid).get().then(doc => {
+      if (doc.exists) {
+        const data = doc.data();
+        document.getElementById('username').textContent = data.username;
+        document.getElementById('bio').textContent = data.bio;
+        document.getElementById('profilePic').src = data.profilePic;
 
-  function addGalleryImage(url) {
-    const imageUrl = url || document.getElementById('galleryInput').value;
-    if(imageUrl.trim() === '') return;
-    const img = document.createElement('img');
-    img.src = imageUrl;
-    galleryDiv.appendChild(img);
-    document.getElementById('galleryInput').value = '';
+        // Load gallery
+        const galleryDiv = document.getElementById('gallery');
+        galleryDiv.innerHTML = '';
+        data.gallery.forEach(url => {
+          const img = document.createElement('img');
+          img.src = url;
+          galleryDiv.appendChild(img);
+        });
+      }
+    });
+  });
+
+  function addGalleryImage() {
+    const url = document.getElementById('galleryInput').value;
+    if (!url.trim()) return;
+    db.collection('users').doc(currentUser.uid).update({
+      gallery: firebase.firestore.FieldValue.arrayUnion(url)
+    }).then(() => {
+      const img = document.createElement('img');
+      img.src = url;
+      document.getElementById('gallery').appendChild(img);
+      document.getElementById('galleryInput').value = '';
+    });
   }
 
-  // Posts section
-  const postsDiv = document.getElementById('posts');
   function addPost() {
-    const postText = document.getElementById('postInput').value;
-    if(postText.trim() === '') return;
+    const text = document.getElementById('postInput').value;
+    if (!text.trim()) return;
     const postDiv = document.createElement('div');
     postDiv.className = 'post';
-    postDiv.innerHTML = `<strong>${username}:</strong> ${postText}`;
-    postsDiv.prepend(postDiv); // newest on top
+    postDiv.innerHTML = `<strong>${document.getElementById('username').textContent}:</strong> ${text}`;
+    document.getElementById('posts').prepend(postDiv);
     document.getElementById('postInput').value = '';
   }
-</script>
 
+  // Logout button
+  document.querySelector('nav a[href="auth.html"]').addEventListener('click', e => {
+    e.preventDefault();
+    auth.signOut().then(() => {
+      window.location.href = 'auth.html';
+    });
+  });
+</script>
 </body>
 </html>
