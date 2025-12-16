@@ -1,156 +1,83 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NovaStar Profile</title>
-<style>
-  body { font-family: Arial, sans-serif; margin:0; background:#f0f2f5; }
-  header { background:#4B0082; color:white; padding:15px; text-align:center; }
-  nav { background:#6A0DAD; padding:10px; text-align:center; }
-  nav a { color:white; text-decoration:none; margin:0 15px; font-weight:bold; }
-  nav a:hover { text-decoration:underline; }
-  main { max-width:900px; margin:20px auto; background:white; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+  <title>Profile</title>
+</head>
+<body>
 
-  .cover-photo { width:100%; height:200px; background:#ddd; position:relative; }
-  .profile-pic { width:150px; height:150px; border-radius:50%; border:4px solid white; position:absolute; bottom:-75px; left:20px; background:white; }
-  .profile-info { padding:90px 20px 20px 20px; }
-  .profile-info h2 { margin:0; }
-  .profile-info p { color:#555; }
+<button onclick="logout()">Logout</button>
+<a href="index.html">Back to Feed</a>
 
-  .gallery { display:flex; flex-wrap:wrap; gap:10px; margin:20px 0; }
-  .gallery img { width:150px; height:150px; object-fit:cover; border-radius:8px; cursor:pointer; }
+<div class="profile-header">
+  <img id="profilePic" width="120">
+  <h2 id="username"></h2>
+</div>
 
-  .post { border:1px solid #ddd; padding:10px; margin-bottom:15px; border-radius:8px; background:#fff; }
-  .post strong { color:#4B0082; }
+<textarea id="bio" placeholder="Edit bio"></textarea>
+<button onclick="saveProfile()">Save Profile</button>
 
-  .input-container { margin:15px 0; }
-  input[type="text"] { padding:10px; width:70%; margin-right:5px; }
-  button { padding:10px; background:#1877f2; color:white; border:none; cursor:pointer; }
-  button:hover { background:#165ecf; }
-</style>
+<h3>Add Gallery Image (URL)</h3>
+<input id="galleryUrl">
+<button onclick="addImage()">Add</button>
 
-<!-- Firebase SDKs -->
+<h3>Gallery</h3>
+<div id="gallery"></div>
+
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-storage-compat.js"></script>
 
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyDaZl3MtYPutJMY1aqozvVoN8WbjNnlW20",
     authDomain: "starline-social.firebaseapp.com",
     projectId: "starline-social",
-    storageBucket: "starline-social.firebasestorage.app",
     messagingSenderId: "902689303596",
-    appId: "1:902689303596:web:b77d39e05d51c5b8993589",
-    measurementId: "G-647YLJZ7BS"
+    appId: "1:902689303596:web:b77d39e05d51c5b8993589"
   };
 
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
-  const storage = firebase.storage();
-</script>
-
-<body>
-<header>
-  <h1>NovaStar Social</h1>
-</header>
-
-<nav>
-  <a href="index.html">Home</a>
-  <a href="auth.html">Logout</a>
-</nav>
-
-<main>
-  <div class="cover-photo">
-    <img id="profilePic" class="profile-pic" src="https://via.placeholder.com/150" alt="Profile Picture">
-  </div>
-
-  <div class="profile-info">
-    <h2 id="username">User</h2>
-    <p id="bio">This is your bio.</p>
-  </div>
-
-  <h3>Gallery</h3>
-  <div class="input-container">
-    <input type="text" id="galleryInput" placeholder="Enter image URL to add to gallery">
-    <button onclick="addGalleryImage()">Add Image</button>
-  </div>
-  <div id="gallery" class="gallery"></div>
-
-  <h3>Posts</h3>
-  <div class="input-container">
-    <input type="text" id="postInput" placeholder="What's on your mind?">
-    <button onclick="addPost()">Post</button>
-  </div>
-  <div id="posts"></div>
-</main>
-
-<footer style="text-align:center; padding:15px; background:#4B0082; color:white;">
-  &copy; 2025 NovaStar Social
-</footer>
-
-<script>
-  let currentUser;
 
   auth.onAuthStateChanged(user => {
-    if (!user) {
-      window.location.href = "auth.html";
-      return;
-    }
-    currentUser = user;
+    if (!user) location.href = "auth.html";
 
-    db.collection('users').doc(user.uid).get().then(doc => {
-      if (doc.exists) {
-        const data = doc.data();
-        document.getElementById('username').textContent = data.username;
-        document.getElementById('bio').textContent = data.bio;
-        document.getElementById('profilePic').src = data.profilePic;
+    db.collection("users").doc(user.uid).onSnapshot(doc => {
+      const d = doc.data();
+      username.textContent = d.username;
+      bio.value = d.bio;
+      profilePic.src = d.profilePic;
+    });
 
-        // Load gallery
-        const galleryDiv = document.getElementById('gallery');
-        galleryDiv.innerHTML = '';
-        data.gallery.forEach(url => {
-          const img = document.createElement('img');
-          img.src = url;
-          galleryDiv.appendChild(img);
+    db.collection("gallery").where("uid","==",user.uid)
+      .onSnapshot(snap => {
+        gallery.innerHTML = "";
+        snap.forEach(doc => {
+          gallery.innerHTML += `<img src="${doc.data().url}" width="120">`;
         });
-      }
-    });
+      });
   });
 
-  function addGalleryImage() {
-    const url = document.getElementById('galleryInput').value;
-    if (!url.trim()) return;
-    db.collection('users').doc(currentUser.uid).update({
-      gallery: firebase.firestore.FieldValue.arrayUnion(url)
-    }).then(() => {
-      const img = document.createElement('img');
-      img.src = url;
-      document.getElementById('gallery').appendChild(img);
-      document.getElementById('galleryInput').value = '';
+  function saveProfile() {
+    db.collection("users").doc(auth.currentUser.uid).update({
+      bio: bio.value
     });
   }
 
-  function addPost() {
-    const text = document.getElementById('postInput').value;
-    if (!text.trim()) return;
-    const postDiv = document.createElement('div');
-    postDiv.className = 'post';
-    postDiv.innerHTML = `<strong>${document.getElementById('username').textContent}:</strong> ${text}`;
-    document.getElementById('posts').prepend(postDiv);
-    document.getElementById('postInput').value = '';
+  function addImage() {
+    db.collection("gallery").add({
+      uid: auth.currentUser.uid,
+      url: galleryUrl.value
+    });
+    galleryUrl.value = "";
   }
 
-  // Logout button
-  document.querySelector('nav a[href="auth.html"]').addEventListener('click', e => {
-    e.preventDefault();
-    auth.signOut().then(() => {
-      window.location.href = 'auth.html';
-    });
-  });
+  function logout() {
+    auth.signOut().then(()=>location.href="auth.html");
+  }
 </script>
+
 </body>
 </html>
