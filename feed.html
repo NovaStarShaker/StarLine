@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StarLine Feed</title>
+</head>
+<body>
+<h1>Feed</h1>
+<nav>
+  <a href="index.html">Home</a>
+  <a href="profile.html">My Profile</a>
+</nav>
+
+<textarea id="postText" placeholder="What's on your mind?"></textarea><br>
+<button onclick="createPost()">Post</button>
+
+<hr>
+<div id="feed"></div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore-compat.js"></script>
+<script src="firebase.js"></script>
+
+<script>
+auth.onAuthStateChanged(user => {
+  if (!user) location.href = "auth.html";
+
+  const feedDiv = document.getElementById("feed");
+  
+  // Display live feed
+  db.collection("posts").orderBy("time", "desc")
+    .onSnapshot(snapshot => {
+      feedDiv.innerHTML = "";
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        const date = d.time ? d.time.toDate().toLocaleString() : "";
+        feedDiv.innerHTML += `<p>${d.text}<br><small>${date}</small></p>`;
+      });
+    });
+});
+
+function createPost() {
+  if (!auth.currentUser || !postText.value.trim()) return;
+
+  db.collection("posts").add({
+    uid: auth.currentUser.uid,
+    text: postText.value,
+    time: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  postText.value = "";
+}
+</script>
+</body>
+</html>
