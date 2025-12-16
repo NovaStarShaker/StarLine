@@ -17,12 +17,13 @@
     .profile-info h2 { margin:5px 0; }
     .profile-info p { color:#555; }
     .post { padding:15px; border-bottom:1px solid #ddd; margin-bottom:10px; }
+    #gallery img { border-radius:8px; }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>StaLine Social</h1>
+  <h1>NovaStar Social</h1>
 </header>
 
 <nav>
@@ -34,39 +35,59 @@
 </nav>
 
 <main>
+  <!-- Profile Picture Section -->
   <div class="profile-header">
-    <img src="https://via.placeholder.com/120" alt="Profile Picture">
+    <img id="profilePic" src="https://via.placeholder.com/120" alt="Profile Picture">
   </div>
 
+  <!-- User Info -->
   <div class="profile-info">
     <h2 id="username">User</h2>
-    <p id="joinDate">Joined: 2025</p>
-    <p id="bio">This is a sample bio for the user.</p>
+    <p id="bio">This is a sample bio.</p>
   </div>
 
+  <!-- User Posts -->
   <h3>Recent Posts</h3>
   <div id="posts">
-    <div class="post">
-      <p><strong>Post:</strong> Example post content goes here.</p>
-    </div>
+    <div class="post"><p><strong>Post:</strong> Example post content goes here.</p></div>
   </div>
+
+  <!-- Gallery Section -->
+  <h3>Gallery</h3>
+  <div id="gallery" style="text-align:center;"></div>
+
 </main>
 
 <footer>
-  &copy; 2025 StarLine Social
+  &copy; 2025 NovaStar Social
 </footer>
 
 <script>
-  // Get username from URL query
+  // Get username and profile pic from URL
   const params = new URLSearchParams(window.location.search);
   const username = params.get('user') || 'Guest';
+  const pic = params.get('pic') || 'https://via.placeholder.com/120';
 
+  // Update profile header and info
   document.getElementById('username').textContent = username;
   document.getElementById('bio').textContent = `This is ${username}'s bio.`;
-  document.getElementById('posts').innerHTML = `
-    <div class="post"><p><strong>${username}:</strong> This is my first post!</p></div>
-    <div class="post"><p><strong>${username}:</strong> Here's another post.</p></div>
-  `;
+  document.getElementById('profilePic').src = pic;
+
+  // Example gallery images
+  const galleryImages = [
+    'https://via.placeholder.com/150/FF0000',
+    'https://via.placeholder.com/150/00FF00',
+    'https://via.placeholder.com/150/0000FF'
+  ];
+
+  const galleryDiv = document.getElementById('gallery');
+  galleryImages.forEach(url => {
+    const img = document.createElement('img');
+    img.src = url;
+    img.style.width = '120px';
+    img.style.margin = '5px';
+    galleryDiv.appendChild(img);
+  });
 </script>
 
 </body>
