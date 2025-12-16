@@ -3,69 +3,59 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NovaStar Social</title>
+  <title>StarLine Social</title>
 
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f0f0;
       margin: 0;
-      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
     }
 
     header {
-      background-color: #4B0082;
+      background: #4B0082;
       color: white;
-      padding: 20px;
       text-align: center;
+      padding: 25px;
+    }
+
+    header img {
+      width: 90px;
+      display: block;
+      margin: 0 auto 10px;
     }
 
     nav {
-      background-color: #6A0DAD;
-      padding: 10px;
+      background: #6A0DAD;
       text-align: center;
+      padding: 12px;
     }
 
-    nav a, nav button {
+    nav a {
       color: white;
       text-decoration: none;
-      margin: 0 12px;
       font-weight: bold;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
+      margin: 0 15px;
     }
 
-    nav a:hover, nav button:hover {
+    nav a:hover {
       text-decoration: underline;
     }
 
     main {
-      padding: 20px;
       max-width: 800px;
-      margin: 20px auto;
-      background-color: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    textarea {
-      width: 100%;
-      height: 80px;
-      margin-bottom: 10px;
-    }
-
-    .post {
-      padding: 15px;
-      border-bottom: 1px solid #ddd;
+      margin: 30px auto;
+      background: white;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,.1);
     }
 
     footer {
+      background: #4B0082;
+      color: white;
       text-align: center;
       padding: 15px;
-      background-color: #4B0082;
-      color: white;
-      margin-top: 20px;
+      margin-top: 30px;
     }
   </style>
 </head>
@@ -73,90 +63,30 @@
 <body>
 
 <header>
-  <h1>NovaStar Social</h1>
-  <p>Your cosmic social feed</p>
+  <img src="images/logo.png" alt="NovaStar Logo">
+  <h1>StarLine Social</h1>
+  <p>Your cosmic social space</p>
 </header>
 
 <nav>
   <a href="index.html">Home</a>
+  <a href="feed.html">Feed</a>
+  <a href="updates.html">Profile</a>
   <a href="profile.html">Profile</a>
-  <button onclick="logout()">Logout</button>
+  <a href="auth.html">Login</a>
 </nav>
 
 <main>
-  <h2>Create Post</h2>
-  <textarea id="postText" placeholder="What's on your mind?"></textarea>
-  <button onclick="createPost()">Post</button>
-
-  <h2>Feed</h2>
-  <div id="feed"></div>
+  <h2>Welcome</h2>
+  <p>
+    StarLine Social is a simple, text-based social space built on GitHub Pages.
+    Sign in to post, view your feed, and manage your profile.
+  </p>
 </main>
 
 <footer>
-  &copy; 2025 NovaStar Social
+  © 2025 StarLine Social ✨
 </footer>
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore-compat.js"></script>
-
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDaZl3MtYPutJMY1aqozvVoN8WbjNnlW20",
-    authDomain: "starline-social.firebaseapp.com",
-    projectId: "starline-social",
-    messagingSenderId: "902689303596",
-    appId: "1:902689303596:web:b77d39e05d51c5b8993589"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-
-  auth.onAuthStateChanged(user => {
-    if (!user) {
-      window.location.href = "auth.html";
-    }
-  });
-
-  function logout() {
-    auth.signOut().then(() => {
-      window.location.href = "auth.html";
-    });
-  }
-
-  function createPost() {
-    if (!auth.currentUser || !postText.value.trim()) return;
-
-    db.collection("posts").add({
-      uid: auth.currentUser.uid,
-      text: postText.value,
-      time: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    postText.value = "";
-  }
-
-  db.collection("posts")
-    .orderBy("time", "desc")
-    .onSnapshot(snapshot => {
-      feed.innerHTML = "";
-      snapshot.forEach(doc => {
-        const d = doc.data();
-        const date = d.time
-          ? d.time.toDate().toLocaleString()
-          : "";
-
-        feed.innerHTML += `
-          <div class="post">
-            <p>${d.text}</p>
-            <small>${date}</small>
-          </div>
-        `;
-      });
-    });
-</script>
 
 </body>
 </html>
