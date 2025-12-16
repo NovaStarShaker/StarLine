@@ -1,72 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>✨StarLine Social✨</title>
-  <style>
-    body { font-family: Arial; background-color: #f0f0f0; margin:0; padding:0; }
-    header { background-color: #4B0082; color:white; padding:20px; text-align:center; }
-    nav { background-color: #6A0DAD; padding:10px; text-align:center; }
-    nav a { color:white; text-decoration:none; margin:0 15px; font-weight:bold; }
-    nav a:hover { text-decoration:underline; }
-    main { padding:20px; max-width:800px; margin:auto; background:white; box-shadow:0 0 10px rgba(0,0,0,0.1); margin-top:20px; }
-    footer { text-align:center; padding:15px; background-color:#4B0082; color:white; margin-top:20px; }
-    .post { padding:15px; border-bottom:1px solid #ddd; margin-bottom:10px; }
-
-    /* New image section */
-    .top-images {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .top-images img {
-      max-width: 100%;
-      height: auto;
-      margin-bottom: 10px;
-      border-radius: 10px; /* optional, makes corners rounded */
-    }
-  </style>
+  <title>StarLine Feed</title>
 </head>
 <body>
 
-<header>
-  <h1>Welcome to StarLine Social!</h1>
-</header>
+<h1>StarLine</h1>
+<button onclick="logout()">Logout</button>
+<a href="profile.html">My Profile</a>
 
-<nav>
-  <a href="index.html">Home</a>
-  <a href="auth.html">Login / Sign Up</a>
-  <a href="profile.html">Profile</a>
-  <a href="messages.html">Messages</a>
-  <a href="#">Friends</a>
-</nav>
+<h3>Create Post</h3>
+<textarea id="postText"></textarea>
+<button onclick="post()">Post</button>
 
-<main>
+<h3>Feed</h3>
+<div id="feed"></div>
 
-  <!-- Top Images Section -->
-  <div class="top-images">
-    <img src="IMG_0149.jpeg" alt="StarLine Logo">
-    <img src="images/banner1.jpg" alt="Banner 1">
-    <img src="images/banner2.jpg" alt="Banner 2">
-  </div>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore-compat.js"></script>
 
-  <h2>Latest Posts</h2>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDaZl3MtYPutJMY1aqozvVoN8WbjNnlW20",
+    authDomain: "starline-social.firebaseapp.com",
+    projectId: "starline-social",
+    messagingSenderId: "902689303596",
+    appId: "1:902689303596:web:b77d39e05d51c5b8993589"
+  };
 
-  <div class="post">
-    <h3>Welcoming Post:</h3>
-    <p><strong>Nova:</strong> Just set up my GitHub Pages site! Excited to build my social platform here. This website is a W.I.P, sign up/& login works fine, just don't refresh, you can only post in text box, so far.</p>
-  </div>
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-  <div class="post">
-    <h3>Another Post:</h3>
-    <p><strong>Friend:</strong> Hello! This is a sample post to show the feed layout.</p>
-  </div>
+  auth.onAuthStateChanged(user => {
+    if (!user) window.location.href = "auth.html";
+  });
 
-</main>
+  function logout() {
+    auth.signOut().then(() => location.href = "auth.html");
+  }
 
-<footer>
-  &copy; 2025 StarLine Social - December, 16th✨
-</footer>
+  function post() {
+    auth.currentUser && db.collection("posts").add({
+      uid: auth.currentUser.uid,
+      text: postText.value,
+      time: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    postText.value = "";
+  }
+
+  db.collection("posts").orderBy("time", "desc")
+    .onSnapshot(snap => {
+      feed.innerHTML = "";
+      snap.forEach(doc => {
+        const d = doc.data();
+        const date = d.time?.toDate().toLocaleDateString();
+        feed.innerHTML += `<p>${d.text}<br><small>${date}</small></p>`;
+      });
+    });
+</script>
 
 </body>
 </html>
