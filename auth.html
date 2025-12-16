@@ -4,22 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>StarLine Login / Signup</title>
-
 <style>
-  body { font-family: Arial,sans-serif; background: #f0f0f0; margin:0; }
-  header { background: #4B0082; color: white; text-align: center; padding: 25px; }
-  nav { background: #6A0DAD; text-align: center; padding: 12px; }
-  nav a { color:white; text-decoration:none; font-weight:bold; margin:0 15px; }
-  nav a:hover { text-decoration:underline; }
-  main { max-width:400px; margin:30px auto; background:white; padding:20px; box-shadow:0 0 10px rgba(0,0,0,.1); }
-  input { width:100%; padding:10px; margin:5px 0; }
-  button { padding:10px; width:100%; background:#4B0082; color:white; border:none; cursor:pointer; }
-  button:hover { background:#6A0DAD; }
-  p { text-align:center; }
-  .message { color:red; font-size:0.9em; text-align:center; }
+body { font-family: Arial,sans-serif; background: #f0f0f0; margin:0; }
+header { background: #4B0082; color: white; text-align: center; padding: 25px; }
+nav { background: #6A0DAD; text-align: center; padding: 12px; }
+nav a { color:white; text-decoration:none; font-weight:bold; margin:0 15px; }
+nav a:hover { text-decoration:underline; }
+main { max-width:400px; margin:30px auto; background:white; padding:20px; box-shadow:0 0 10px rgba(0,0,0,.1); }
+input { width:100%; padding:10px; margin:5px 0; }
+button { padding:10px; width:100%; background:#4B0082; color:white; border:none; cursor:pointer; }
+button:hover { background:#6A0DAD; }
+.message { color:red; font-size:0.9em; text-align:center; }
 </style>
 </head>
-
 <body>
 <header>
   <h1>StarLine Social</h1>
@@ -49,7 +46,6 @@
   <p class="message" id="signupMsg"></p>
 </main>
 
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore-compat.js"></script>
@@ -65,10 +61,8 @@ function login() {
   if (!email || !pass) { msg.textContent = "Enter email and password."; return; }
 
   auth.signInWithEmailAndPassword(email, pass)
-    .then(() => {
-      window.location.href = "feed.html";
-    })
-    .catch(error => { msg.textContent = error.message; });
+    .then(() => { window.location.href = "feed.html"; })
+    .catch(error => { msg.textContent = error.message; console.error(error); });
 }
 
 function signup() {
@@ -81,14 +75,13 @@ function signup() {
 
   auth.createUserWithEmailAndPassword(email, pass)
     .then(userCredential => {
-      // Optional: create a profile document in Firestore
       db.collection("users").doc(userCredential.user.uid).set({
         email: email,
         joined: firebase.firestore.FieldValue.serverTimestamp()
       });
       window.location.href = "feed.html";
     })
-    .catch(error => { msg.textContent = error.message; });
+    .catch(error => { msg.textContent = error.message; console.error(error); });
 }
 
 // Redirect logged-in users automatically
@@ -96,6 +89,5 @@ auth.onAuthStateChanged(user => {
   if (user) window.location.href = "feed.html";
 });
 </script>
-
 </body>
 </html>
