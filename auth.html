@@ -1,43 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NovaStar Social - Auth</title>
-<style>
-  body { font-family: Arial, sans-serif; background:#f0f2f5; text-align:center; padding:50px; }
-  input { padding:10px; margin:5px; width:200px; }
-  button { padding:10px 20px; margin:10px; cursor:pointer; background:#4B0082; color:white; border:none; }
-  button:hover { background:#6A0DAD; }
-</style>
+  <title>StarLine Login</title>
+</head>
+<body>
 
-<!-- Firebase SDKs -->
+<h2>Login</h2>
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+
+<h2>Sign Up</h2>
+<input id="signupEmail" placeholder="Email">
+<input id="signupPassword" type="password" placeholder="Password">
+<input id="signupUsername" placeholder="Username">
+<input id="signupPic" placeholder="Profile Picture URL (optional)">
+<button onclick="signup()">Sign Up</button>
+
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-storage-compat.js"></script>
 
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyDaZl3MtYPutJMY1aqozvVoN8WbjNnlW20",
     authDomain: "starline-social.firebaseapp.com",
     projectId: "starline-social",
-    storageBucket: "starline-social.firebasestorage.app",
     messagingSenderId: "902689303596",
-    appId: "1:902689303596:web:b77d39e05d51c5b8993589",
-    measurementId: "G-647YLJZ7BS"
+    appId: "1:902689303596:web:b77d39e05d51c5b8993589"
   };
 
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
-</script>
-</head>
-<body>
 
-<h1>NovaStar Social</h1>
-<h2>Sign Up</h2>
-<input type="text" id="signupUsername" placeholder="Username"><br>
-<input type="email" id="signupEmail" placeholder="Email"><br>
-<input type="password" id="signupPassword" placeholder="Password"><br>
-<input type="text" id="signupPic" placeholder="Profile Picture URL (o
+  function signup() {
+    auth.createUserWithEmailAndPassword(
+      signupEmail.value,
+      signupPassword.value
+    ).then(cred => {
+      return db.collection("users").doc(cred.user.uid).set({
+        username: signupUsername.value,
+        bio: "",
+        profilePic: signupPic.value || "https://via.placeholder.com/120"
+      });
+    }).then(() => {
+      window.location.href = "index.html";
+    });
+  }
+
+  function login() {
+    auth.signInWithEmailAndPassword(
+      email.value,
+      password.value
+    ).then(() => {
+      window.location.href = "index.html";
+    });
+  }
+</script>
+
+</body>
+</html>
