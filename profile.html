@@ -10,6 +10,7 @@
 <nav>
   <a href="index.html">Home</a>
   <a href="feed.html">Feed</a>
+  <button onclick="logout()">Logout</button>
 </nav>
 
 <p id="email"></p>
@@ -23,9 +24,9 @@
 
 <script>
 auth.onAuthStateChanged(user => {
-  if (!user) location.href = "auth.html";
+  if (!user) window.location.href = "auth.html";
 
-  email.textContent = "Signed in as: " + user.email;
+  document.getElementById("email").textContent = "Signed in as: " + user.email;
 
   const myPostsDiv = document.getElementById("myPosts");
   db.collection("posts")
@@ -40,6 +41,10 @@ auth.onAuthStateChanged(user => {
       });
     });
 });
+
+function logout() {
+  auth.signOut().then(() => window.location.href = "auth.html");
+}
 </script>
 </body>
 </html>
