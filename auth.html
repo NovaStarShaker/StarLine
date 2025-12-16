@@ -47,6 +47,7 @@
       <input type="text" id="signupUsername" placeholder="Username" required><br>
       <input type="email" placeholder="Email" required><br>
       <input type="password" placeholder="Password" required><br>
+      <input type="text" id="signupPic" placeholder="Profile Picture URL (optional)"><br>
       <button type="submit">Sign Up</button>
     </form>
     <div class="toggle">
@@ -65,17 +66,20 @@
       document.getElementById('loginForm').style.display = 'block';
     }
 
-    // Redirect to profile.html with username
+    // Redirect to profile.html with username and optional profile pic
     document.getElementById('loginFormElement').addEventListener('submit', function(e) {
       e.preventDefault();
       const username = document.getElementById('loginUsername').value;
-      window.location.href = `profile.html?user=${encodeURIComponent(username)}`;
+      // For login, use placeholder pic
+      const pic = 'https://via.placeholder.com/120';
+      window.location.href = `profile.html?user=${encodeURIComponent(username)}&pic=${encodeURIComponent(pic)}`;
     });
 
     document.getElementById('signupFormElement').addEventListener('submit', function(e) {
       e.preventDefault();
       const username = document.getElementById('signupUsername').value;
-      window.location.href = `profile.html?user=${encodeURIComponent(username)}`;
+      const pic = document.getElementById('signupPic').value || 'https://via.placeholder.com/120';
+      window.location.href = `profile.html?user=${encodeURIComponent(username)}&pic=${encodeURIComponent(pic)}`;
     });
   </script>
 
