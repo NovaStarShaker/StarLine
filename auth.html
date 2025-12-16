@@ -1,63 +1,100 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>StarLine Login</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StarLine Login / Signup</title>
+
+<style>
+  body { font-family: Arial,sans-serif; background: #f0f0f0; margin:0; }
+  header { background: #4B0082; color: white; text-align: center; padding: 25px; }
+  nav { background: #6A0DAD; text-align: center; padding: 12px; }
+  nav a { color:white; text-decoration:none; font-weight:bold; margin:0 15px; }
+  nav a:hover { text-decoration:underline; }
+  main { max-width:400px; margin:30px auto; background:white; padding:20px; box-shadow:0 0 10px rgba(0,0,0,.1); }
+  input { width:100%; padding:10px; margin:5px 0; }
+  button { padding:10px; width:100%; background:#4B0082; color:white; border:none; cursor:pointer; }
+  button:hover { background:#6A0DAD; }
+  p { text-align:center; }
+  .message { color:red; font-size:0.9em; text-align:center; }
+</style>
 </head>
+
 <body>
+<header>
+  <h1>StarLine Social</h1>
+  <p>Login or Sign Up</p>
+</header>
 
-<h2>Login</h2>
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
+<nav>
+  <a href="index.html">Home</a>
+  <a href="feed.html">Feed</a>
+  <a href="profile.html">Profile</a>
+  <a href="updates.html">Updates</a>
+</nav>
 
-<h2>Sign Up</h2>
-<input id="signupEmail" placeholder="Email">
-<input id="signupPassword" type="password" placeholder="Password">
-<input id="signupUsername" placeholder="Username">
-<input id="signupPic" placeholder="Profile Picture URL (optional)">
-<button onclick="signup()">Sign Up</button>
+<main>
+  <h2>Login</h2>
+  <input type="email" id="loginEmail" placeholder="Email">
+  <input type="password" id="loginPass" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <p class="message" id="loginMsg"></p>
 
-<!-- Firebase -->
+  <hr>
+
+  <h2>Sign Up</h2>
+  <input type="email" id="signupEmail" placeholder="Email">
+  <input type="password" id="signupPass" placeholder="Password">
+  <button onclick="signup()">Sign Up</button>
+  <p class="message" id="signupMsg"></p>
+</main>
+
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore-compat.js"></script>
+<script src="firebase.js"></script>
 
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDaZl3MtYPutJMY1aqozvVoN8WbjNnlW20",
-    authDomain: "starline-social.firebaseapp.com",
-    projectId: "starline-social",
-    messagingSenderId: "902689303596",
-    appId: "1:902689303596:web:b77d39e05d51c5b8993589"
-  };
+function login() {
+  const email = document.getElementById("loginEmail").value.trim();
+  const pass = document.getElementById("loginPass").value.trim();
+  const msg = document.getElementById("loginMsg");
+  msg.textContent = "";
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+  if (!email || !pass) { msg.textContent = "Enter email and password."; return; }
 
-  function signup() {
-    auth.createUserWithEmailAndPassword(
-      signupEmail.value,
-      signupPassword.value
-    ).then(cred => {
-      return db.collection("users").doc(cred.user.uid).set({
-        username: signupUsername.value,
-        bio: "",
-        profilePic: signupPic.value || "https://via.placeholder.com/120"
+  auth.signInWithEmailAndPassword(email, pass)
+    .then(() => {
+      window.location.href = "feed.html";
+    })
+    .catch(error => { msg.textContent = error.message; });
+}
+
+function signup() {
+  const email = document.getElementById("signupEmail").value.trim();
+  const pass = document.getElementById("signupPass").value.trim();
+  const msg = document.getElementById("signupMsg");
+  msg.textContent = "";
+
+  if (!email || !pass) { msg.textContent = "Enter email and password."; return; }
+
+  auth.createUserWithEmailAndPassword(email, pass)
+    .then(userCredential => {
+      // Optional: create a profile document in Firestore
+      db.collection("users").doc(userCredential.user.uid).set({
+        email: email,
+        joined: firebase.firestore.FieldValue.serverTimestamp()
       });
-    }).then(() => {
-      window.location.href = "index.html";
-    });
-  }
+      window.location.href = "feed.html";
+    })
+    .catch(error => { msg.textContent = error.message; });
+}
 
-  function login() {
-    auth.signInWithEmailAndPassword(
-      email.value,
-      password.value
-    ).then(() => {
-      window.location.href = "index.html";
-    });
-  }
+// Redirect logged-in users automatically
+auth.onAuthStateChanged(user => {
+  if (user) window.location.href = "feed.html";
+});
 </script>
 
 </body>
