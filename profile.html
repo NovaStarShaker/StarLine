@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StarLine Profile</title>
+</head>
+<body>
+<h1>My Profile</h1>
+<nav>
+  <a href="index.html">Home</a>
+  <a href="feed.html">Feed</a>
+</nav>
+
+<p id="email"></p>
+<h3>My Posts</h3>
+<div id="myPosts"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore-compat.js"></script>
+<script src="firebase.js"></script>
+
+<script>
+auth.onAuthStateChanged(user => {
+  if (!user) location.href = "auth.html";
+
+  email.textContent = "Signed in as: " + user.email;
+
+  const myPostsDiv = document.getElementById("myPosts");
+  db.collection("posts")
+    .where("uid", "==", user.uid)
+    .orderBy("time", "desc")
+    .onSnapshot(snapshot => {
+      myPostsDiv.innerHTML = "";
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        const date = d.time ? d.time.toDate().toLocaleString() : "";
+        myPostsDiv.innerHTML += `<p>${d.text}<br><small>${date}</small></p>`;
+      });
+    });
+});
+</script>
+</body>
+</html>
