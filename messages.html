@@ -1,1 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>✨StarLine Messages✨</title>
+  <style>
+    body { font-family: Arial; background-color:#f0f0f0; margin:0; padding:0; }
+    header { background-color:#4B0082; color:white; padding:20px; text-align:center; }
+    nav { background-color:#6A0DAD; padding:10px; text-align:center; }
+    nav a { color:white; text-decoration:none; margin:0 15px; font-weight:bold; }
+    nav a:hover { text-decoration:underline; }
+    main { max-width:800px; margin:auto; padding:20px; background:white; box-shadow:0 0 10px rgba(0,0,0,0.1); margin-top:20px; }
+    .chat-list, .chat-box { border:1px solid #ddd; padding:10px; margin-bottom:20px; border-radius:5px; background:#f9f9f9; }
+    .chat-user { cursor:pointer; padding:5px; border-bottom:1px solid #ddd; }
+    .chat-user:last-child { border-bottom:none; }
+    .messages { max-height:300px; overflow-y:auto; margin-bottom:10px; }
+    .message { padding:5px; margin-bottom:5px; border-radius:5px; }
+    .from-me { background-color:#d1ffd1; text-align:right; }
+    .from-them { background-color:#ffd1d1; text-align:left; }
+    input[type="text"] { width:80%; padding:5px; }
+    button { padding:5px 10px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>StarLine Messages</h1>
+</header>
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="auth.html">Login / Sign Up</a>
+  <a href="profile.html">Profile</a>
+  <a href="messages.html">Messages</a>
+</nav>
+
+<main>
+  <h2>Chat Users</h2>
+  <div class="chat-list" id="chatList">
+    <div class="chat-user" onclick="openChat('Friend1')">Friend1</div>
+    <div class="chat-user" onclick="openChat('Friend2')">Friend2</div>
+    <div class="chat-user" onclick="openChat('RandomUser')">RandomUser</div>
+  </div>
+
+  <div class="chat-box" id="chatBox" style="display:none;">
+    <h3 id="chatTitle"></h3>
+    <div class="messages" id="messages"></div>
+    <input type="text" id="messageInput" placeholder="Type your message">
+    <button onclick="sendMessage()">Send</button>
+    <p id="friendStatus"></p>
+  </div>
+</main>
+
+<script>
+let currentChat = '';
+let chatHistory = {}; // store messages per user
+let ratings = {}; // store user ratings
+let bannedUsers = JSON.parse(localStorage.getItem('bannedUsers') || '{}');
+
+// Open chat with selected user
+function openChat(username) {
+  if (bannedUsers[username] && new Date() < new Date(bannedUsers[username])) {
+    alert(username + ' is banned due to negative behavior. Come back later.');
+    return;
+  }
+
+  currentChat = username;
+  document.getElementById('chatBox').style.display = 'block';
+  document.getElementById('chatTitle').textContent = 'Chat with ' + username;
+  document.getElementById('messages').innerHTML = '';
+
+  if (!chatHistory[username]) chatHistory[username] = [];
+  chatHistory[username].forEach(msg => displayMessage(msg));
+  updateFriendStatus();
+}
+
+// Display a message
+function displayMessage(msg) {
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'message ' + (msg.from === 'me' ? 'from-me' : 'from-them');
+  msgDiv.textContent = msg.text;
+  document.getElementById('messages').appendChild(msgDiv);
+  msgDiv.scrollIntoView();
+}
+
+// Send a message
+function sendMessage() {
+  const input = document.getElementById('messageInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const msg = { from: 'me', text };
+  chatHistory[currentChat].push(msg);
+  displayMessage(msg);
+  input.value = '';
+
+  checkBehavior(currentChat, text);
+  updateFriendStatus();
+}
+
+// Simple behavior check
+function checkBehavior(username, text) {
+  let lower = text.toLowerCase();
+  if (!ratings[username]) ratings[username] = 0;
+
+  // negative words
+  const negativeWords = ['stupid','idiot','kill yourself','hate'];
+  let negativeDetected = false;
+  negativeWords.forEach(word => {
+    if (lower.includes(word)) negativeDetected = true;
+  });
+
+  if (negativeDetected) {
+    ratings[username] -= 1;
+    alert('Negative behavior detected! Rating decreased.');
+    if (ratings[username] <= -3) {
+      let banUntil = new Date();
+      banUntil.setMonth(banUntil.getMonth() + 2);
+      bannedUsers[username] = banUntil;
+      localStorage.setItem('bannedUsers', JSON.stringify(bannedUsers));
+      alert(username + ' has been banned for 2 months due to repeated negative behavior.');
+    }
+  } else {
+    ratings[username] += 1;
+  }
+}
+
+// Determine friendship potential
+function updateFriendStatus() {
+  const rating = ratings[currentChat] || 0;
+  const status = document.getElementById('friendStatus');
+  if (rating >= 3) {
+    status.textContent = 'You and ' + currentChat + ' could be friends!';
+  } else if (rating <= -1) {
+    status.textContent = currentChat + ' is showing negative behavior.';
+  } else {
+    status.textContent = '';
+  }
+}
+</script>
+
+</body>
+</html>
 
